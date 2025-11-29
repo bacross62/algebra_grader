@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Grader AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Algebra Grader <span class="highlight">AI</span></h1>
+            <p class="subtitle">Automated grading with partial credit intelligence</p>
+        </header>
+
+        <main>
+            <section class="config-panel glass-card">
+                <h2>Configuration</h2>
+                <form id="gradingForm">
+                    <!-- API Key is now loaded from .env -->
+
+                    <div class="input-group">
+                        <label for="folderPath">Quiz Folder Path</label>
+                        <input type="text" id="folderPath" placeholder="/Users/username/Documents/Quizzes" required>
+                        <small>Absolute path to the folder containing student PDFs</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="rubricFile">Grading Rubric File</label>
+                        <input type="file" id="rubricFile" accept=".txt,.md,.pdf,.docx" required>
+                        <small>Upload a Text, Markdown, PDF, or Word file containing the rubric.</small>
+                    </div>
+
+                    <button type="submit" id="gradeBtn" class="btn-primary">
+                        <span class="btn-text">Start Grading</span>
+                        <div class="loader hidden"></div>
+                    </button>
+                </form>
+            </section>
+
+            <section id="resultsSection" class="results-section hidden">
+                <div class="results-header">
+                    <h2>Grading Results</h2>
+                    <div class="stats-summary">
+                        <div class="stat-card glass-card">
+                            <span class="stat-label">Processed</span>
+                            <span class="stat-value" id="processedCount">0</span>
+                        </div>
+                        <div class="stat-card glass-card">
+                            <span class="stat-label">Average Score</span>
+                            <span class="stat-value" id="avgScore">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="resultsGrid" class="results-grid">
+                    <!-- Results will be injected here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

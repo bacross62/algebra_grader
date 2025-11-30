@@ -1,51 +1,70 @@
-# Algebra Grader
+# Algebra Grader AI
 
-Automated grading tool for algebra quizzes using Google's Gemini AI.
+A robust, AI-powered tool for automatically grading handwritten algebra quizzes. It uses Google's Gemini models to analyze student work, award partial credit, and generate detailed feedback reports.
 
 ## Features
-- **PDF Grading**: Automatically extracts and grades handwritten student responses from PDF files.
-- **Partial Credit**: AI-powered logic awards partial credit for correct steps even if the final answer is wrong.
-- **Feedback Generation**: Generates detailed feedback PDFs for each student, including score breakdowns and specific comments.
-- **Web Interface**: Simple browser-based interface for uploading quizzes and rubrics.
+
+*   **AI-Powered Grading**: Uses Gemini 3 Pro (and fallbacks) to understand handwritten math and logic.
+*   **Partial Credit**: Awards points for correct steps even if the final answer is wrong.
+*   **Detailed Feedback**: Generates a PDF for each student explaining their mistakes.
+*   **Teacher Summary**: Creates a class-wide report identifying common misconceptions and problem areas.
+*   **Resume Capability**: Automatically skips already graded quizzes if interrupted, saving time and API credits.
+*   **Streaming Responses**: Shows grading progress in real-time to prevent browser timeouts.
+*   **Robustness**: Handles API timeouts with retries and prevents computer sleep during grading (Wake Lock).
+*   **Math Rendering**: Cleanly renders mathematical symbols (fractions, exponents, roots) using Unicode.
+*   **Customizable**: Configurable rubric and misconception thresholds.
+*   **Fairfield Prep Theme**: Designed with the school's official colors.
 
 ## Requirements
-- Python 3.9+
-- Google Gemini API Key
+
+*   Python 3.10+
+*   Google Gemini API Key
 
 ## Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/bacross62/algebra_grader.git
-   cd algebra_grader
-   ```
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd algebra_grader
+    ```
 
-2. **Install Dependencies**
-   It is recommended to use a virtual environment.
-   ```bash
-   pip install -r algebra_grader/requirements.txt
-   ```
+2.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-3. **Environment Configuration**
-   Create a `.env` file in the `algebra_grader` directory:
-   ```bash
-   GEMINI_API_KEY=your_api_key_here
-   ```
+3.  **Configuration**:
+    Create a `.env` file in the `algebra_grader` directory with your API key and settings.
+
+    **Sample `.env` file:**
+    ```env
+    # Your Google Gemini API Key
+    GEMINI_API_KEY=your_actual_api_key_here
+
+    # Threshold for including misconceptions in the Teacher Summary (0.4 = 40%)
+    MISCONCEPTION_THRESHOLD=0.4
+    ```
 
 ## Usage
 
-1. **Start the Application**
-   ```bash
-   cd algebra_grader
-   python app.py
-   ```
+1.  **Start the application**:
+    ```bash
+    python app.py
+    ```
 
-2. **Grade Quizzes**
-   - Open your browser to `http://127.0.0.1:5001`.
-   - Upload the folder containing student PDF quizzes.
-   - Upload the grading rubric (text or file).
-   - Click "Grade".
+2.  **Open in Browser**:
+    Go to `http://127.0.0.1:5001`.
 
-3. **View Results**
-   - The application will display the results on the screen.
-   - Feedback PDFs will be generated in a `feedback` subfolder within your quizzes directory.
+3.  **Grade Quizzes**:
+    *   **Select Folder**: Click the button to choose the folder containing your student PDF quizzes.
+    *   **Upload Rubric**: Select your grading rubric file (Text, Markdown, PDF, or Word).
+    *   **Start**: Click "Start Grading".
+
+4.  **View Results**:
+    *   Watch the progress in real-time.
+    *   Find individual feedback PDFs in a `feedback` subfolder within your quiz directory.
+    *   Find the `Teacher_Summary.pdf` in the same `feedback` folder after grading completes.
+
+## License
+
+MIT License

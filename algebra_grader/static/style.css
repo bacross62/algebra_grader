@@ -1,12 +1,19 @@
 :root {
-    --bg-color: #0f172a;
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --accent-color: #3b82f6;
-    --accent-hover: #2563eb;
+    --bg-color: #ffffff;
+    /* White background */
+    --card-bg: rgba(255, 255, 255, 0.8);
+    /* Light card */
+    --text-primary: #1e293b;
+    /* Dark slate for text */
+    --text-secondary: #64748b;
+    /* Lighter slate */
+    --accent-color: #ED1E40;
+    /* Fairfield Prep Crimson */
+    --accent-hover: #c41230;
+    /* Darker Crimson */
     --success-color: #10b981;
-    --border-color: rgba(148, 163, 184, 0.1);
+    --border-color: rgba(237, 30, 64, 0.2);
+    /* Crimson tint border */
 }
 
 body {
@@ -32,13 +39,15 @@ body {
     position: absolute;
     border-radius: 50%;
     filter: blur(80px);
-    opacity: 0.4;
+    opacity: 0.6;
+    /* Higher opacity for light mode */
 }
 
 .blob-1 {
     width: 400px;
     height: 400px;
-    background: #4f46e5;
+    background: #fecaca;
+    /* Very light red */
     top: -100px;
     left: -100px;
     animation: float 10s infinite alternate;
@@ -47,24 +56,32 @@ body {
 .blob-2 {
     width: 300px;
     height: 300px;
-    background: #ec4899;
+    background: #fde047;
+    /* Light yellow/gold (often a secondary school color) or just neutral warm */
     bottom: -50px;
     right: -50px;
     animation: float 12s infinite alternate-reverse;
+    opacity: 0.4;
 }
 
 .blob-3 {
     width: 250px;
     height: 250px;
-    background: #06b6d4;
+    background: #e2e8f0;
+    /* Light gray */
     top: 40%;
     left: 40%;
     animation: float 15s infinite alternate;
 }
 
 @keyframes float {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(30px, 50px); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(30px, 50px);
+    }
 }
 
 .container {
@@ -82,13 +99,14 @@ h1 {
     font-size: 3rem;
     font-weight: 700;
     margin: 0;
+    color: #1e293b;
 }
 
 .highlight {
     color: var(--accent-color);
-    background: linear-gradient(120deg, #3b82f6, #8b5cf6);
+    background: none;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: var(--accent-color);
 }
 
 .subtitle {
@@ -104,7 +122,8 @@ h1 {
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    /* Softer shadow for light mode */
 }
 
 .config-panel {
@@ -134,8 +153,8 @@ input[type="password"],
 textarea {
     width: 100%;
     padding: 0.75rem;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--border-color);
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     color: var(--text-primary);
     font-family: inherit;
@@ -199,8 +218,13 @@ small {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .results-header {
@@ -281,7 +305,8 @@ small {
 }
 
 .question-item {
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 0.75rem;

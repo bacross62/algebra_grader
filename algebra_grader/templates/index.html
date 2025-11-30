@@ -32,8 +32,11 @@
 
                     <div class="input-group">
                         <label for="folderPath">Quiz Folder Path</label>
-                        <input type="text" id="folderPath" placeholder="/Users/username/Documents/Quizzes" required>
-                        <small>Absolute path to the folder containing student PDFs</small>
+                        <div class="folder-select-wrapper">
+                            <input type="text" id="folderPath" placeholder="No folder selected" readonly required>
+                            <button type="button" id="selectFolderBtn" class="btn-secondary">Select Folder</button>
+                        </div>
+                        <small>Folder containing student PDFs</small>
                     </div>
 
                     <div class="input-group">

@@ -68,3 +68,8 @@ A robust, AI-powered tool for automatically grading handwritten algebra quizzes.
 ## License
 
 MIT License
+
+## Built With
+
+*   **Google Gemini 3 Pro**: Advanced multimodal AI model for reasoning and grading.
+*   **Antigravity**: Agentic AI coding assistant by Google DeepMind.

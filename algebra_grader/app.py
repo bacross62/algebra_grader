@@ -107,6 +107,62 @@ def clean_latex_to_text(text):
         
     return text
 
+def get_best_model(api_key):
+    """
+    Selects the best available Gemini model from a preferred list.
+    """
+    genai.configure(api_key=api_key)
+    
+    available_models = []
+    try:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                available_models.append(m.name)
+    except Exception as e:
+        logging.error(f"Error listing models: {e}")
+        raise Exception(f"Failed to list Gemini models: {e}")
+
+    # Priority list of preferred models
+    preferred_models = [
+        'models/gemini-3-pro-preview',
+        'models/gemini-3.0-pro',
+        'gemini-3.0-pro',
+        'models/gemini-1.5-pro-latest',
+        'models/gemini-1.5-pro',
+        'gemini-1.5-pro',
+        'models/gemini-1.5-flash',
+        'models/gemini-1.5-flash-001',
+        'models/gemini-1.5-pro-001',
+        'models/gemini-pro', # General purpose model
+        'gemini-pro',
+        'models/gemini-pro-vision', # Fallback for older keys, though less ideal for text-only
+    ]
+
+    selected_model_name = None
+    
+    # 1. Try to find a preferred model in the available list
+    for pref in preferred_models:
+        if pref in available_models:
+            selected_model_name = pref
+            break
+    
+    # 2. If no preferred model found, pick the first available 'gemini' model
+    if not selected_model_name:
+        for m in available_models:
+            if 'gemini' in m:
+                selected_model_name = m
+                break
+    
+    # 3. Last resort: just use the first available model if any
+    if not selected_model_name:
+         if available_models:
+             selected_model_name = available_models[0]
+         else:
+             raise Exception("No suitable Gemini model found.")
+
+    logging.info(f"Selected Model: {selected_model_name}")
+    return selected_model_name
+
 def grade_pdf(pdf_path, rubric_text, api_key):
     """
     Grades a single PDF using Gemini.
@@ -319,14 +375,13 @@ def generate_teacher_summary(all_results, output_path, api_key):
             return
 
         # Configure Gemini for summary generation
-        genai.configure(api_key=api_key)
-        
-        # Select model (reuse logic or just pick best available)
-        model_name = 'models/gemini-1.5-pro' # Default to a strong model for reasoning
-        # Try to find the preferred one if possible, but hardcoding for simplicity in this helper
-        # or pass the model object. Let's re-instantiate to be safe.
-        
-        model = genai.GenerativeModel(model_name) 
+        # Select model using the helper
+        try:
+            model_name = get_best_model(api_key)
+            model = genai.GenerativeModel(model_name) 
+        except Exception as e:
+            logging.error(f"Failed to select model for summary: {e}")
+            return 
 
         # Get threshold from env
         threshold = float(os.getenv('MISCONCEPTION_THRESHOLD', 0.4))
@@ -335,12 +390,18 @@ def generate_teacher_summary(all_results, output_path, api_key):
         prompt = f"""
         Analyze the following feedback provided to algebra students after a quiz.
         Identify the most common misconceptions, frequent procedural errors, and general areas where the class struggled.
+        
         Provide a summary for the teacher with:
         1. **Common Misconceptions**: Identify at least 3 common misconceptions. CRITICAL: Also include ANY other misconception that affects more than {threshold_percent}% of the students.
         2. **Problem Areas**: Which types of questions caused the most trouble?
         3. **Recommendations**: What topics should the teacher review in class?
         
-        Format the output as a clean, professional report. Do not use LaTeX. Use Unicode for math symbols.
+        **Formatting Instructions**:
+        - Format as a professional report, NOT a memo. 
+        - DO NOT include "To", "From", "Date", or "Subject" headers.
+        - DO NOT include a date.
+        - Use **bold** for key terms and *italics* for emphasis.
+        - Do not use LaTeX. Use Unicode for math symbols.
         
         Feedback Data:
         {aggregated_text[:30000]} # Truncate if too long to avoid token limits
@@ -354,34 +415,60 @@ def generate_teacher_summary(all_results, output_path, api_key):
         styles = getSampleStyleSheet()
         
         # Register font if not already (it should be global but let's be safe or just use styles)
-        # Assuming DejaVuSans is registered in main scope or we re-register if needed.
-        # Since this is a function, we rely on the global registration or fallback.
         font_name = 'DejaVuSans' if 'DejaVuSans' in pdfmetrics.getRegisteredFontNames() else 'Helvetica'
         
         styles['Normal'].fontName = font_name
         styles['Heading1'].fontName = font_name
         styles['Heading2'].fontName = font_name
         
+        # Create a custom style for bullet points to handle indentation better if needed
+        # But for now standard Normal is fine
+        
         story = []
         story.append(Paragraph("<b>Teacher Summary Report</b>", styles['Title']))
         story.append(Spacer(1, 12))
         
         # Process Markdown-like text from Gemini to Paragraphs
-        # Simple split by newlines for now
         for line in summary_text.split('\n'):
             line = line.strip()
             if not line:
                 story.append(Spacer(1, 6))
                 continue
             
-            if line.startswith('**') and line.endswith('**'):
-                story.append(Paragraph(clean_latex_to_text(line.replace('**', '')), styles['Heading2']))
+            # 1. Clean LaTeX/Math first
+            line = clean_latex_to_text(line)
+            
+            # 2. Convert Markdown to ReportLab XML tags
+            # Bold: **text** -> <b>text</b>
+            line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)
+            # Italics: *text* -> <i>text</i> (avoid matching bullet points '* ')
+            # We handle bullet points by checking startswith, so we can just replace inner *
+            # But regex is safer: match * not at start, or * at start if not followed by space?
+            # Simplest: handle bullets first, then format the rest.
+            
+            style = styles['Normal']
+            prefix = ""
+            
+            if line.startswith('# '):
+                style = styles['Heading1']
+                line = line[2:]
+            elif line.startswith('## '):
+                style = styles['Heading2']
+                line = line[3:]
+            elif line.startswith('### '):
+                style = styles['Heading3']
+                line = line[4:]
             elif line.startswith('* ') or line.startswith('- '):
-                story.append(Paragraph(f"• {clean_latex_to_text(line[2:])}", styles['Normal']))
-            elif line.startswith('1. ') or line.startswith('2. ') or line.startswith('3. '):
-                 story.append(Paragraph(clean_latex_to_text(line), styles['Heading3']))
-            else:
-                story.append(Paragraph(clean_latex_to_text(line), styles['Normal']))
+                prefix = "• "
+                line = line[2:]
+            elif re.match(r'^\d+\.', line):
+                # Numbered list, keep as is but maybe bold the number?
+                pass
+            
+            # Apply italics to the remaining content (handling *word*)
+            line = re.sub(r'(?<!\*)\*(?!\*)(.*?)\*', r'<i>\1</i>', line)
+            
+            story.append(Paragraph(f"{prefix}{line}", style))
         
         doc.build(story)
         logging.info(f"Teacher Summary saved to {output_path}")

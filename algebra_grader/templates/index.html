@@ -45,6 +45,17 @@
                         <small>Upload a Text, Markdown, PDF, or Word file containing the rubric.</small>
                     </div>
 
+                    <div class="input-group checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="privacyCheck" checked>
+                            <label for="privacyCheck">Do not save student work for training purposes</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="antiCheatingCheck" checked>
+                            <label for="antiCheatingCheck">Enable Anti-Cheating Mechanism</label>
+                        </div>
+                    </div>
+
                     <button type="submit" id="gradeBtn" class="btn-primary">
                         <span class="btn-text">Start Grading</span>
                         <div class="loader hidden"></div>

@@ -176,6 +176,37 @@ small {
     font-size: 0.85rem;
 }
 
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    margin-bottom: 0;
+    font-weight: 400;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
 .btn-primary {
     width: 100%;
     padding: 1rem;

@@ -352,23 +352,33 @@ def generate_feedback_pdf(feedback_data, output_path):
 
     doc.build(story)
 
-def generate_teacher_summary(all_results, output_path, api_key):
+def generate_teacher_summary(all_results, output_path, api_key, anti_cheating=False):
     """
     Generates a summary PDF of common misconceptions and errors.
+    Optionally analyzes for cheating.
     """
     try:
         logging.info("Generating Teacher Summary...")
         
         # Aggregate all feedback
         aggregated_text = ""
+        cheating_data = ""
+        
         for res in all_results:
             if "error" in res:
                 continue
-            aggregated_text += f"\nStudent: {res.get('student_name', 'Unknown')}\n"
+            student = res.get('student_name', 'Unknown')
+            aggregated_text += f"\nStudent: {student}\n"
             aggregated_text += f"Overall Feedback: {res.get('overall_feedback', '')}\n"
+            
             if 'questions' in res:
                 for q in res['questions']:
                     aggregated_text += f"Q{q.get('question_number')}: {q.get('feedback', '')}\n"
+                    
+                    if anti_cheating:
+                        cheating_data += f"\nStudent: {student}, Q{q.get('question_number')}\n"
+                        cheating_data += f"Reasoning: {q.get('student_reasoning', 'N/A')}\n"
+                        cheating_data += f"Final Answer: {q.get('final_answer', 'N/A')}\n"
         
         if not aggregated_text:
             logging.warning("No feedback data available for summary.")
@@ -387,6 +397,23 @@ def generate_teacher_summary(all_results, output_path, api_key):
         threshold = float(os.getenv('MISCONCEPTION_THRESHOLD', 0.4))
         threshold_percent = int(threshold * 100)
 
+        cheating_prompt_section = ""
+        if anti_cheating and cheating_data:
+            cheating_prompt_section = f"""
+            4. **Anti-Cheating Analysis**:
+               Analyze the following student reasoning and answers for signs of cheating.
+               Look for:
+               - Identical unique phrasing or unusual steps repeated between students.
+               - Same specific errors or illogical steps repeated.
+               - Extreme similarity in reasoning that is unlikely to happen by chance.
+               
+               If you find suspicious pairs or groups, list them and explain WHY it looks like cheating.
+               If no suspicious similarities are found, state "No obvious signs of cheating detected."
+               
+               Cheating Data to Analyze:
+               {cheating_data[:50000]}
+            """
+
         prompt = f"""
         Analyze the following feedback provided to algebra students after a quiz.
         Identify the most common misconceptions, frequent procedural errors, and general areas where the class struggled.
@@ -395,6 +422,7 @@ def generate_teacher_summary(all_results, output_path, api_key):
         1. **Common Misconceptions**: Identify at least 3 common misconceptions. CRITICAL: Also include ANY other misconception that affects more than {threshold_percent}% of the students.
         2. **Problem Areas**: Which types of questions caused the most trouble?
         3. **Recommendations**: What topics should the teacher review in class?
+        {cheating_prompt_section}
         
         **Formatting Instructions**:
         - Format as a professional report, NOT a memo. 
@@ -486,6 +514,10 @@ def grade():
     api_key = os.getenv('GEMINI_API_KEY')
     folder_path = request.form.get('folder_path')
     rubric_file = request.files.get('rubric_file')
+    
+    # Get flags (strings 'true'/'false' from JS FormData)
+    privacy_mode = request.form.get('privacy_mode') == 'true'
+    anti_cheating = request.form.get('anti_cheating') == 'true'
 
     if not folder_path or not os.path.isdir(folder_path):
         return jsonify({"error": "Invalid folder path"}), 400
@@ -533,7 +565,8 @@ def grade():
             
             # If not found or error loading, grade it
             if not result:
-                result = grade_pdf(pdf_file, rubric_text, api_key)
+                # Pass anti_cheating and privacy_mode flags to grade_pdf
+                result = grade_pdf(pdf_file, rubric_text, api_key, anti_cheating=anti_cheating, privacy_mode=privacy_mode)
                 result['filename'] = base_name
                 
                 # Save result for future resumption
@@ -570,7 +603,8 @@ def grade():
         # Generate Teacher Summary after all quizzes are processed
         try:
             summary_path = os.path.join(feedback_folder, "Teacher_Summary.pdf")
-            generate_teacher_summary(all_results, summary_path, api_key)
+            # Pass anti_cheating flag to summary generator
+            generate_teacher_summary(all_results, summary_path, api_key, anti_cheating=anti_cheating)
             # Optional: Yield a special event or log indicating summary is ready
             # yield json.dumps({"info": "Teacher Summary Generated"}) + '\n'
         except Exception as e:

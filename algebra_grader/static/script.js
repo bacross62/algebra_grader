@@ -29,6 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const folderPath = document.getElementById('folderPath').value;
         const rubricFile = document.getElementById('rubricFile').files[0];
+        const privacyCheck = document.getElementById('privacyCheck').checked;
+        const antiCheatingCheck = document.getElementById('antiCheatingCheck').checked;
+
+        if (!folderPath) {
+            alert('Please select a folder first.');
+            return;
+        }
 
         if (!rubricFile) {
             alert("Please upload a rubric file.");
@@ -62,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // API Key is handled by backend from .env
             formData.append('folder_path', folderPath);
             formData.append('rubric_file', rubricFile);
+            formData.append('privacy_mode', privacyCheck);
+            formData.append('anti_cheating', antiCheatingCheck);
 
             const response = await fetch('/grade', {
                 method: 'POST',

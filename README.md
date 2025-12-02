@@ -8,6 +8,8 @@ A robust, AI-powered tool for automatically grading handwritten algebra quizzes.
 *   **Partial Credit**: Awards points for correct steps even if the final answer is wrong.
 *   **Detailed Feedback**: Generates a PDF for each student explaining their mistakes.
 *   **Teacher Summary**: Creates a class-wide report identifying common misconceptions and problem areas.
+*   **Anti-Cheating**: Analyzes student reasoning across the class to detect suspicious similarities and potential copying.
+*   **Privacy Focused**: Optional "Privacy Mode" suppresses detailed logging to ensure student data remains ephemeral.
 *   **Resume Capability**: Automatically skips already graded quizzes if interrupted, saving time and API credits.
 *   **Streaming Responses**: Shows grading progress in real-time to prevent browser timeouts.
 *   **Robustness**: Handles API timeouts with retries and prevents computer sleep during grading (Wake Lock).
@@ -58,6 +60,9 @@ A robust, AI-powered tool for automatically grading handwritten algebra quizzes.
 3.  **Grade Quizzes**:
     *   **Select Folder**: Click the button to choose the folder containing your student PDF quizzes.
     *   **Upload Rubric**: Select your grading rubric file (Text, Markdown, PDF, or Word).
+    *   **Privacy & Cheating**:
+        *   **Privacy Mode**: Checked by default. Prevents saving work for training and suppresses local data logging.
+        *   **Anti-Cheating**: Checked by default. Enables cross-student analysis to detect copying.
     *   **Start**: Click "Start Grading".
 
 4.  **View Results**:
